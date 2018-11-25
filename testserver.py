@@ -36,7 +36,7 @@ aaa = session1.getActiveSessions()
 print(aaa)
 # print(session2.getActiveSessions())
 # print(session1.getActiveSessions())
-pass
+# pass
 # # create a third session
 # key3 = sp.genKey("test-data/keys", "test3", "Dr. Alexander Siddig", "Deep Space Nine")
 # key3.register(host)
