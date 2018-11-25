@@ -16,6 +16,12 @@ def inside(dirPath, filePath):
     filep = abspath(filePath)  
     return filep.startswith(join(directory, ''))  
 
+def get_url(url):
+    result = urlparse(url)[1]
+    url = result.split(':')[0]
+    return url
+
+
 def get_port(url):  # extract port number from url
     result = urlparse(url)[1]  
     port = result.split(':')[-1]  
@@ -31,7 +37,7 @@ class Node:
         self.keyDict = {}
 
     def _start(self):   # start the server
-        server = SimpleXMLRPCServer(('',get_port(self.url)),logRequests=False)
+        server = SimpleXMLRPCServer((get_url(self.url),get_port(self.url)),logRequests=False)
         server.register_instance(self)
         server.serve_forever()
 
@@ -103,10 +109,11 @@ def main():
     node._start()  
             
 if __name__ == '__main__':
-    # url = 'http://192.168.0.21:8080'
+    url = 'http://192.168.0.21:8080'
+    print((get_url(url),get_port(url)))
     # directory = 'NodeFiles01'
     # key = '123456'
-    main()
+    # main()
 
 
 
