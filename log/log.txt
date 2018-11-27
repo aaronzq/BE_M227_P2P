@@ -1,0 +1,13 @@
+Client Server log: aaron ucla
+==================================================
+Start Session. IP: http://192.168.0.21:8080 Sharing Folder: NodeFiles02 Time: 2018-11-27 00:09:09.842161
+End Session. IP: http://192.168.0.21:8080 Sharing Folder: NodeFiles02 Time: 2018-11-27 00:09:23.106511
+Start Session. IP: http://192.168.0.21:8080 Sharing Folder: NodeFiles02 Time: 2018-11-27 00:09:36.813324
+Operation Illegal [Start Session]. Time: 2018-11-27 00:09:44.269808
+Get active sessions. Time: 2018-11-27 00:10:17.692021
+Get my public key. Time:2018-11-27 00:10:34.380942Fail [get Session IP][too many users]. Time: 2018-11-27 00:10:56.219114
+Sign Public Key . Time: 2018-11-27 00:11:22.540880
+Get my signature. Time: 2018-11-27 00:11:25.544832
+Success! Folder request from URL: http://192.168.1.1:8080. Time: 2018-11-27 00:11:33.036916
+Success! File [testfile.txt] request from URL: http://192.168.1.1:8080. Time: 2018-11-27 00:11:34.944433
+End Session. IP: http://192.168.0.21:8080 Sharing Folder: NodeFiles02 Time: 2018-11-27 00:12:05.006917

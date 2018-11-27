@@ -54,6 +54,8 @@ class Node:
 	        shutil.rmtree(path)
         for path in glob.glob("./permissions/*"):
 	        os.remove(path)
+        for path in glob.glob("./log/*"):
+            os.remove(path)
 
         self.permission = sp.Permission("./permissions", self.userName)
         self.myKey = sp.genKey("./keys","myKey",self.userName,self.organization)
@@ -62,6 +64,13 @@ class Node:
         
         with open('./keys/myKey/private-key') as f:
             self.internalKey = f.read()
+
+        self.log = open("./log/log.txt","w+")
+        self.log.write("Client Server log: {:} {:}\n".format(self.userName,self.organization))
+        self.log.write("==================================================\n")
+        self.log.close()
+        
+        
 
         self.searchList = set()
         
@@ -119,8 +128,12 @@ class Node:
         #Restriction: each Client can only register with one session
         #each Client has to end its session before starting another one
         #Make sure each Username is unique to session
+        time = str(datetime.datetime.now())
+        self.log = open("./log/log.txt","a+")
         if not internalKey == self.internalKey:
             print('Operation Illegal')
+            self.log.write("Operation Illegal [Start Session]. Time: {:}\n".format(time))
+            self.log.close()
             return PERMISSION_DENY
 
         if self.session is None:
@@ -132,6 +145,8 @@ class Node:
             print("Client listening on port: ", get_port(self.localUrl))
             print("Sharing Folder: ", self.dirName)
             print("===========================================================")
+            self.log.write("Start Session. IP: {:} Sharing Folder: {:} Time: {:}\n".format(self.localUrl,self.dirName,time))            
+            self.log.close()
             return OK
         else:
             print('You already have one session running on Server!')
@@ -140,15 +155,23 @@ class Node:
             print("Client listening on port: ", get_port(self.localUrl))
             print("Sharing Folder: ", self.dirName)
             print("===========================================================")
+            self.log.write("Fail [Start Session].Time: {:}\n".format(time))
+            self.log.close()
             return FAIL
 
     def endSession(self,internalKey):
+        time = str(datetime.datetime.now())
+        self.log = open("./log/log.txt","a+")
         if not internalKey == self.internalKey:
             print('Operation Illegal')
+            self.log.write("Operation Illegal [End Session]. Time: {:}\n".format(time))
+            self.log.close()
             return PERMISSION_DENY
 
         if self.session is None:
             print("Before ending session, you have to start one.")
+            self.log.write("Fail [End Session].Time: {:}\n".format(time))
+            self.log.close()
             return FAIL
         else:
             self.session.stopSession()
@@ -156,44 +179,66 @@ class Node:
             print("Your session has been stopped.")
             print("Client NO MORE listening on port: ", get_port(self.localUrl))
             print("===========================================================")
+            self.log.write("End Session. IP: {:} Sharing Folder: {:} Time: {:}\n".format(self.localUrl,self.dirName,time))            
+            self.log.close()
             return OK
 
     # For Client Usage
     # return a PublicKey(pem str) of my own public key
     def getMyPublicKey(self, internalKey):
+        time = str(datetime.datetime.now())
+        self.log = open("./log/log.txt","a+")
         if not internalKey == self.internalKey:
             print('Operation Illegal')
+            self.log.write("Operation Illegal [get My Public Key]. Time: {:}\n".format(time))
+            self.log.close()
             return PERMISSION_DENY
 
+        self.log.write("Get my public key. Time:{:}".format(time))
+        self.log.close()
         return sp.publicKeyToPemString(self.myKey._public_key)
 
     # For CLient Usage
     # return a dict for my own signature [!Signature can be passed by XmlRPC server]
     def getMySignature(self, internalKey):
+        time = str(datetime.datetime.now())
+        self.log = open("./log/log.txt","a+")
         if not internalKey == self.internalKey:
             print('Operation Illegal')
+            self.log.write("Operation Illegal [get My Signature]. Time: {:}\n".format(time))
+            self.log.close()
             return PERMISSION_DENY
 
         if not self.session == None :
+            self.log.write("Get my signature. Time: {:}\n".format(time))
+            self.log.close()
             return self.session.getSignatures()   
         else:
+            self.log.write("Fail [get My Signature]. Time: {:}\n".format(time))
             print("You need a registered session bofore getting your signatures")
+            self.log.close()
             return PERMISSION_DENY    
 
     # For Client Usage
     # For user to look those running sessions on Cloud Server
     # No return value
     def getActiveSessions(self,internalKey):
+        time = str(datetime.datetime.now())
+        self.log = open("./log/log.txt","a+")
         if not internalKey == self.internalKey:
             print('Operation Illegal')
+            self.log.write("Operation Illegal [get Active Sessions]. Time: {:}\n".format(time))
+            self.log.close()
             return PERMISSION_DENY
 
         activeSessionsALL = sp.searchSessions(self.host)
         activeSessionsALL = activeSessionsALL['sessions']
         activeSessionNum = len(activeSessionsALL)
+        self.log.write("Get active sessions. Time: {:}\n".format(time))
         print(str(activeSessionNum), 'sessions running on server currently...')
         for session in activeSessionsALL:
             print('Username: {:>25} | Organization: {:>30} | IP: {:>15} | Port: {:>5}'.format(session['name'],session['organization'],session['ip'],session['port']))
+        self.log.close()
         return OK
 
     # For Client Usage
@@ -203,26 +248,38 @@ class Node:
     # Input: userName(str)
     # Output: IP(str), Username(str), Organization(str) 
     def getSessionIP(self,userName,internalKey):
+        time = str(datetime.datetime.now())
+        self.log = open("./log/log.txt","a+")
         if not internalKey == self.internalKey:
             print('Operation Illegal')
+            self.log.write("Operation Illegal [get Session IP]. Time: {:}\n".format(time))
+            self.log.close()
             return PERMISSION_DENY
 
         tarSession = sp.searchSessions(self.host,userName)
         tarSession = tarSession['sessions']
         if len(tarSession) == 0:
             print('No such session running on Cloud Server!')
+            self.log.write("Fail [get Session IP][no user]. Time: {:}\n".format(time))
+            self.log.close()
             return FAIL
         elif len(tarSession) == 1:
             tar = tarSession[0]
+            self.log.write("Get Session IP of user {:}. Time: {:}\n".format(tar['name'],time))
             print('Located session successfully.')
             print('Username: {:>25} | Organization: {:>30} | IP: {:>15} | Port: {:>5}'.format(tar['name'],tar['organization'],tar['ip'],tar['port']))
+            self.log.close()
             return ('http://' + tar['ip'] + ':' + str(tar['port'])), tar['name'], tar['organization']
         elif len(tarSession) > 1:
             print('Selected multiple sessions. Please specify the Username with more character')
             for session in tarSession:
                 print('Username: {:>25} | Organization: {:>30} | IP: {:>15} | Port: {:>5}'.format(session['name'],session['organization'],session['ip'],session['port']))
+            self.log.write("Fail [get Session IP][too many users]. Time: {:}\n".format(time))
+            self.log.close()
             return FAIL
         else:
+            self.log.write("Fail [get Session IP]. Time: {:}\n".format(time))
+            self.log.close()
             return FAIL
 
     # For Client Usage
@@ -231,41 +288,58 @@ class Node:
     # Input: userName(str)
     # Output: Public Key(pem str), name(str), organization(str)
     def getPubKey(self,userName,internalKey):
+        time = str(datetime.datetime.now())
+        self.log = open("./log/log.txt","a+")
         if not internalKey == self.internalKey:
             print('Operation Illegal')
+            self.log.write("Operation Illegal [get Public Key]. Time: {:}\n".format(time))
+            self.log.close()
             return PERMISSION_DENY
 
         tarPubKey = sp.searchKeys(self.host, userName)
         tarPubKey = tarPubKey['users']
         if len(tarPubKey) == 0:
             print('No such Public Key on Cloud Server!')
+            self.log.write("Fail [get Public Key][no user]. Time: {:}\n".format(time))
+            self.log.close()           
             return FAIL
         elif len(tarPubKey) == 1:
             tar = tarPubKey[0]
             print('Located Public Key successfully.')
             print('Username: {:>25} | Organization: {:>30} | PubKey: {:}'.format(tar['name'],tar['organization'],sp.prettyFingerprint(sp.publicKeyFingerprint(sp.pemStringToPublicKey(tar['public_key'])))))
+            self.log.write("Get Public Key of {:}. Time: {:}\n".format(tar['name'],time))
+            self.log.close()
             return sp.pemStringToPublicKey(tar['public_key']), tar['name'], tar['organization']
         elif len(tarPubKey) > 1:
             print('Selected multiple Public Keys. Please specify the Username with more character')
             for key in tarPubKey:
                 print('Username: {:>25} | Organization: {:>30} | PubKey: {:}'.format(key['name'],key['organization'],sp.prettyFingerprint(sp.publicKeyFingerprint(sp.pemStringToPublicKey(key['public_key'])))))
+            self.log.write("Fail [get Public Key][too many users]. Time: {:}\n".format(time))
+            self.log.close()
             return FAIL
         else:
+            self.log.write("Fail [get Public Key][too many users]. Time: {:}\n".format(time))
+            self.log.close()
             return FAIL
 
 
     # For Client Usage
     # Input: pubKey(pem str), returned by getPubKey() above
     def signPubKey(self, pubKey, dayNum, internalKey):
+        time = str(datetime.datetime.now())
+        self.log = open("./log/log.txt","a+")
         if not internalKey == self.internalKey:
             print('Operation Illegal')
+            self.log.write("Operation Illegal [sign Public Key]. Time: {:}\n".format(time))
+            self.log.close()
             return PERMISSION_DENY
 
         now = datetime.datetime.now()
         tomorrow = now + datetime.timedelta(days=dayNum)
         self.myKey.signKeyAndSubmit(sp.pemStringToPublicKey(pubKey), self.host, now, tomorrow)
         print('Signed. Expiration at ', str(tomorrow))
-
+        self.log.write("Sign Public Key . Time: {:}\n".format(time))
+        self.log.close()
         return OK
 
 
@@ -273,12 +347,18 @@ class Node:
     # Input: pubKey(pem str), returned by getPubKey() above
     # Input: userName, organization(str), returned by getPubKey() above
     def addAuthorizedKey(self, pubKey, userName, organization, internalKey):
+        time = str(datetime.datetime.now())
+        self.log = open("./log/log.txt","a+")
         if not internalKey == self.internalKey:
             print('Operation Illegal')
+            self.log.write("Operation Illegal [add Authorized Key]. Time: {:}\n".format(time))
+            self.log.close()
             return PERMISSION_DENY
 
         self.permission.addAuthorizedKey(pubKey, userName, organization)
         print('Added authorized key in local permission list.')
+        self.log.write("Add Authorized Key from user: {:}. Time: {:}\n".format(userName,time))
+        self.log.close()
         return OK
 
     # This is an internal function. Only for this node's calling.
@@ -292,22 +372,35 @@ class Node:
     # this function is for external nodes
     # extPubKey: pem str
     # extSignature: dict
+    # extURL: str , only for log record
     # return flag, msg_folder(str) and msg_randomKey(str)
-    def requestFolder(self, extPubKey, extSignature):
+    def requestFolder(self, extPubKey, extSignature, extURL):
+        time = str(datetime.datetime.now())
+        self.log = open("./log/log.txt","a+")
         flag = self._checkPermission(extPubKey, extSignature)
         if flag is True:
+            self.log.write("Success! Folder request from URL: {:}. Time: {:}\n".format(extURL,time))
+            self.log.close()
             return self._localFolderHandler(extPubKey)
         else:
+            self.log.write("Fail! Folder request from URL: {:}. Time: {:}\n".format(extURL,time))
+            self.log.close()
             return PERMISSION_DENY, EMPTY, EMPTY
 
     # For external Client usage
     # return the sharing file
     # this function is for external nodes
-    def requestFile(self, extPubKey, extSignature, fileName):
+    def requestFile(self, extPubKey, extSignature, fileName, extURL):
+        time = str(datetime.datetime.now())
+        self.log = open("./log/log.txt","a+")
         flag = self._checkPermission(extPubKey, extSignature)
         if flag is True:
+            self.log.write("Success! File [{:}] request from URL: {:}. Time: {:}\n".format(fileName,extURL,time))
+            self.log.close()
             return self._localFileHandler(extPubKey, fileName)
         else:
+            self.log.write("Fail! File [{:}] request from URL: {:}. Time: {:}\n".format(fileName,extURL,time))
+            self.log.close()
             return PERMISSION_DENY, EMPTY, EMPTY
   
     # For local Client usage
@@ -325,6 +418,8 @@ class Node:
         f = cipher_suite.decrypt(msg.encode())
         f = f.decode()
         return f       
+
+
 
     # def _localHandler(self,fileName):  #search for requiring file in local repo
     #     filePath = join(self.dirName,fileName)
@@ -390,7 +485,7 @@ class Node:
 
 def main():
     # localurl, username, organization, directory = sys.argv[1:]
-    localurl = 'http://10.144.136.41:8080'
+    localurl = 'http://192.168.0.21:8080'
     username = 'aaron'
     organization = 'ucla'
     directory = 'NodeFiles02'
