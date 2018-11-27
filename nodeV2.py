@@ -34,7 +34,6 @@ def get_url(url):
     url = result.split(':')[0]
     return url
 
-
 def get_port(url):  # extract port number from url
     result = urlparse(url)[1]  
     port = result.split(':')[-1]  
@@ -254,7 +253,7 @@ class Node:
             print('Operation Illegal')
             self.log.write("Operation Illegal [get Session IP]. Time: {:}\n".format(time))
             self.log.close()
-            return PERMISSION_DENY
+            return PERMISSION_DENY, EMPTY, EMPTY, EMPTY
 
         tarSession = sp.searchSessions(self.host,userName)
         tarSession = tarSession['sessions']
@@ -262,25 +261,25 @@ class Node:
             print('No such session running on Cloud Server!')
             self.log.write("Fail [get Session IP][no user]. Time: {:}\n".format(time))
             self.log.close()
-            return FAIL
+            return FAIL, EMPTY, EMPTY, EMPTY
         elif len(tarSession) == 1:
             tar = tarSession[0]
             self.log.write("Get Session IP of user {:}. Time: {:}\n".format(tar['name'],time))
             print('Located session successfully.')
             print('Username: {:>25} | Organization: {:>30} | IP: {:>15} | Port: {:>5}'.format(tar['name'],tar['organization'],tar['ip'],tar['port']))
             self.log.close()
-            return ('http://' + tar['ip'] + ':' + str(tar['port'])), tar['name'], tar['organization']
+            return OK, ('http://' + tar['ip'] + ':' + str(tar['port'])), tar['name'], tar['organization']
         elif len(tarSession) > 1:
             print('Selected multiple sessions. Please specify the Username with more character')
             for session in tarSession:
                 print('Username: {:>25} | Organization: {:>30} | IP: {:>15} | Port: {:>5}'.format(session['name'],session['organization'],session['ip'],session['port']))
             self.log.write("Fail [get Session IP][too many users]. Time: {:}\n".format(time))
             self.log.close()
-            return FAIL
+            return FAIL, EMPTY, EMPTY, EMPTY
         else:
             self.log.write("Fail [get Session IP]. Time: {:}\n".format(time))
             self.log.close()
-            return FAIL
+            return FAIL, EMPTY, EMPTY, EMPTY
 
     # For Client Usage
     # supposing there are no repetitive usernames on the Cloud Server    # Dont need to spell the whole username e.g. for 'admin', 'ad' will also work
@@ -294,7 +293,7 @@ class Node:
             print('Operation Illegal')
             self.log.write("Operation Illegal [get Public Key]. Time: {:}\n".format(time))
             self.log.close()
-            return PERMISSION_DENY
+            return PERMISSION_DENY, EMPTY, EMPTY, EMPTY
 
         tarPubKey = sp.searchKeys(self.host, userName)
         tarPubKey = tarPubKey['users']
@@ -302,25 +301,25 @@ class Node:
             print('No such Public Key on Cloud Server!')
             self.log.write("Fail [get Public Key][no user]. Time: {:}\n".format(time))
             self.log.close()           
-            return FAIL
+            return FAIL, EMPTY, EMPTY, EMPTY
         elif len(tarPubKey) == 1:
             tar = tarPubKey[0]
             print('Located Public Key successfully.')
             print('Username: {:>25} | Organization: {:>30} | PubKey: {:}'.format(tar['name'],tar['organization'],sp.prettyFingerprint(sp.publicKeyFingerprint(sp.pemStringToPublicKey(tar['public_key'])))))
             self.log.write("Get Public Key of {:}. Time: {:}\n".format(tar['name'],time))
             self.log.close()
-            return sp.pemStringToPublicKey(tar['public_key']), tar['name'], tar['organization']
+            return OK, tar['public_key'], tar['name'], tar['organization']
         elif len(tarPubKey) > 1:
             print('Selected multiple Public Keys. Please specify the Username with more character')
             for key in tarPubKey:
                 print('Username: {:>25} | Organization: {:>30} | PubKey: {:}'.format(key['name'],key['organization'],sp.prettyFingerprint(sp.publicKeyFingerprint(sp.pemStringToPublicKey(key['public_key'])))))
             self.log.write("Fail [get Public Key][too many users]. Time: {:}\n".format(time))
             self.log.close()
-            return FAIL
+            return FAIL, EMPTY, EMPTY, EMPTY
         else:
             self.log.write("Fail [get Public Key][too many users]. Time: {:}\n".format(time))
             self.log.close()
-            return FAIL
+            return FAIL, EMPTY, EMPTY, EMPTY
 
 
     # For Client Usage

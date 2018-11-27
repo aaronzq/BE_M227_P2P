@@ -1,13 +1,10 @@
-Client Server log: aaron ucla
+Client Server log: aaroncmd3 ucla
 ==================================================
-Start Session. IP: http://192.168.0.21:8080 Sharing Folder: NodeFiles02 Time: 2018-11-27 00:09:09.842161
-End Session. IP: http://192.168.0.21:8080 Sharing Folder: NodeFiles02 Time: 2018-11-27 00:09:23.106511
-Start Session. IP: http://192.168.0.21:8080 Sharing Folder: NodeFiles02 Time: 2018-11-27 00:09:36.813324
-Operation Illegal [Start Session]. Time: 2018-11-27 00:09:44.269808
-Get active sessions. Time: 2018-11-27 00:10:17.692021
-Get my public key. Time:2018-11-27 00:10:34.380942Fail [get Session IP][too many users]. Time: 2018-11-27 00:10:56.219114
-Sign Public Key . Time: 2018-11-27 00:11:22.540880
-Get my signature. Time: 2018-11-27 00:11:25.544832
-Success! Folder request from URL: http://192.168.1.1:8080. Time: 2018-11-27 00:11:33.036916
-Success! File [testfile.txt] request from URL: http://192.168.1.1:8080. Time: 2018-11-27 00:11:34.944433
-End Session. IP: http://192.168.0.21:8080 Sharing Folder: NodeFiles02 Time: 2018-11-27 00:12:05.006917
+Start Session. IP: http://192.168.0.21:8080 Sharing Folder: NodeFiles02 Time: 2018-11-27 02:12:50.452949
+Get active sessions. Time: 2018-11-27 02:12:55.264705
+Get Public Key of aaroncmd3. Time: 2018-11-27 02:13:03.445754
+Sign Public Key . Time: 2018-11-27 02:13:05.261768
+Get Public Key of aaroncmd3. Time: 2018-11-27 02:13:18.130062
+Add Authorized Key from user: aaroncmd3. Time: 2018-11-27 02:13:20.646894
+Get Session IP of user aaroncmd3. Time: 2018-11-27 02:13:43.194206
+Get my public key. Time:2018-11-27 02:13:52.638367Get my signature. Time: 2018-11-27 02:13:52.640331
