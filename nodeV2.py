@@ -41,10 +41,8 @@ def get_port(url):  # extract port number from url
 
 
 class Node:
-    def __init__(self, localUrl, userName, organization, dirName):
+    def __init__(self, localUrl, dirName):
         self.localUrl = localUrl
-        self.userName = userName
-        self.organization = organization
         self.dirName = dirName
         self.session = None
         self.host = sp.Host("securep2p.fivebillionmph.com")
@@ -57,12 +55,17 @@ class Node:
         for path in glob.glob("./log/*"):
             os.remove(path)
 
-        self.permission = sp.Permission("./permissions", self.userName)
         try:
             self.myKey = sp.getKey("./keys", "myKey")
+            self.userName = self.myKey._name
+            self.organization = self.myKey._organization
         except:
+            self.userName = input("Please enter a username: ")
+            self.organization = input("Please enter an organization: ")
             self.is_new_key = True
             self.myKey = sp.genKey("./keys","myKey",self.userName,self.organization)
+
+        self.permission = sp.Permission("./permissions", self.userName)
 
         self.permission.addAuthorizedKey(sp.publicKeyToPemString(self.myKey._public_key), self.userName, self.organization)
         

@@ -8,6 +8,7 @@ from threading import Thread  # 导入线程类
 from cmd import Cmd  # 导入命令类
 import sys  # 导入系统模块
 from os.path import join
+import requests
 
 HEAD_START =  2 # 等待服务器启动时长
 SECRET_LENGTH = 10 # 密钥长度
@@ -22,12 +23,12 @@ def random_string(length):  # 定义随机密钥的函数
 class Client(Cmd):
     prompt = '>>>'  # 重写超类中的命令提示符
 
-    def __init__(self, localUrl, userName, organization, dirName):  # 定义构造方法
+    def __init__(self, localUrl, dirName):  # 定义构造方法
         Cmd.__init__(self)  # 重载超类的构造方法
         self.localUrl = localUrl
         self.dirName = dirName
         self.sessionON = False
-        node = Node(self.localUrl, userName, organization, dirName)  # 创建节点对象
+        node = Node(self.localUrl, dirName)  # 创建节点对象
         thread = Thread(target=node._start)  # 在独立的线程中启动服务器
         thread.setDaemon(True)  # 将线程设置为守护线程
         thread.start()  # 启动线程
@@ -38,95 +39,116 @@ class Client(Cmd):
 
     # register the session on the cloud server
     def do_startSession(self,arg):
-        self.server.startSession(self.internalKey)
-        self.sessionON = True
+        try:
+            self.server.startSession(self.internalKey)
+            self.sessionON = True
+        except Exception as e:
+            print("error:", e)
 
     # de-register the session on the cloud server
     def do_endSession(self,arg):
-        self.server.endSession(self.internalKey)
-        self.sessionON = False
+        try:
+            self.server.endSession(self.internalKey)
+            self.sessionON = False
+        except Exception as e:
+            print("error:", e)
 
     def do_activeSessions(self,arg):
-        self.server.getActiveSessions(self.internalKey)
+        try:
+            self.server.getActiveSessions(self.internalKey)
+        except Exception as e:
+            print("error:", e)
 
     # arg: userName, expirationDay
     def do_sign(self, arg):
-        userName, expirationDay = arg.split()
-        flag, pubk, username, organization = self.server.getPubKey(userName, self.internalKey)
-        if flag == OK:
-            user_response = input("Are you sure that you want to sign this user. y/N?").lower()
-            if user_response == 'y':
-                self.server.signPubKey(pubk, int(expirationDay), self.internalKey)
-            elif user_response == 'n':
-                print('Signing aborted')
+        try:
+            userName, expirationDay = arg.split()
+            flag, pubk, username, organization = self.server.getPubKey(userName, self.internalKey)
+            if flag == OK:
+                user_response = input("Are you sure that you want to sign this user. y/N?").lower()
+                if user_response == 'y':
+                    self.server.signPubKey(pubk, int(expirationDay), self.internalKey)
+                elif user_response == 'n':
+                    print('Signing aborted')
+                else:
+                    print('Wrong input. Please sign again.')
             else:
-                print('Wrong input. Please sign again.')
-        else:
-            pass
+                pass
+        except Exception as e:
+            print("error:", e)
 
     # 
     def do_authorize(self, userName):
-        flag, pubk, username, organization = self.server.getPubKey(userName, self.internalKey)
-        if flag == OK:
-            user_response = input("Are you sure that you want to authorize this user. y/N?").lower()
-            if user_response == 'y':
-                self.server.addAuthorizedKey(pubk, username, organization, self.internalKey)
-            elif user_response == 'n':
-                print('Signing aborted')
+        try:
+            flag, pubk, username, organization = self.server.getPubKey(userName, self.internalKey)
+            if flag == OK:
+                user_response = input("Are you sure that you want to authorize this user. y/N?").lower()
+                if user_response == 'y':
+                    self.server.addAuthorizedKey(pubk, username, organization, self.internalKey)
+                elif user_response == 'n':
+                    print('Signing aborted')
+                else:
+                    print('Wrong input. Please authorize again.')
             else:
-                print('Wrong input. Please authorize again.')
-        else:
-            pass
+                pass
+        except Exception as e:
+            print("error:", e)
 
     def do_requestFolder(self, userName):
-        flag, url, username, organization = self.server.getSessionIP(userName, self.internalKey)
-        if flag == OK:
-            user_response = input("Are you sure that you want to request this user's folder info. y/N?").lower()
-            if user_response == 'y':
-                myPubKey = self.server.getMyPublicKey(self.internalKey)
-                mySignature = self.server.getMySignature(self.internalKey)
-                Target = ServerProxy(url)
-                flag, msg_folder, msg_randomKey = Target.requestFolder(myPubKey,mySignature,self.localUrl)
-                if flag == OK:
-                    folderInfo = self.server.msgInterpreter(msg_folder,msg_randomKey,self.internalKey)
-                    print('Request Success!')
-                    InfoList = folderInfo.split('|')
-                    print('Folder Name: ', InfoList[0])
-                    for i in range(1,len(InfoList)):
-                        print('        Files ', str(i),  ' : ', InfoList[i])
+        try:
+            flag, url, username, organization = self.server.getSessionIP(userName, self.internalKey)
+            if flag == OK:
+                user_response = input("Are you sure that you want to request this user's folder info. y/N?").lower()
+                if user_response == 'y':
+                    myPubKey = self.server.getMyPublicKey(self.internalKey)
+                    mySignature = self.server.getMySignature(self.internalKey)
+                    Target = ServerProxy(url)
+                    flag, msg_folder, msg_randomKey = Target.requestFolder(myPubKey,mySignature,self.localUrl)
+                    if flag == OK:
+                        folderInfo = self.server.msgInterpreter(msg_folder,msg_randomKey,self.internalKey)
+                        print('Request Success!')
+                        InfoList = folderInfo.split('|')
+                        print('Folder Name: ', InfoList[0])
+                        for i in range(1,len(InfoList)):
+                            print('        Files ', str(i),  ' : ', InfoList[i])
+                    else:
+                        print('Request Fail!')
+                elif user_response == 'n':
+                    print('Request aborted')
                 else:
-                    print('Request Fail!')
-            elif user_response == 'n':
-                print('Request aborted')
+                    print('Wrong input. Please request again.')
             else:
-                print('Wrong input. Please request again.')
-        else:
-            pass       
+                pass       
+        except Exception as e:
+            print("error:", e)
 
     # arg: userName, fileName
     def do_requestFile(self, arg):
-        userName, fileName = arg.split()
-        flag, url, username, organization = self.server.getSessionIP(userName, self.internalKey)
-        if flag == OK:
-            user_response = input("Are you sure that you want to request this user's file. y/N?").lower()
-            if user_response == 'y':
-                myPubKey = self.server.getMyPublicKey(self.internalKey)
-                mySignature = self.server.getMySignature(self.internalKey)
-                Target = ServerProxy(url)
-                flag, msg_file, msg_randomKey = Target.requestFile(myPubKey,mySignature,fileName,self.localUrl)
-                if flag == OK:
-                    tar_File = self.server.msgInterpreter(msg_file,msg_randomKey,self.internalKey)
-                    print('Request Success!')
-                    with open(join(self.dirName, fileName), 'w') as f:
-                        f.write(tar_File)
+        try:
+            userName, fileName = arg.split()
+            flag, url, username, organization = self.server.getSessionIP(userName, self.internalKey)
+            if flag == OK:
+                user_response = input("Are you sure that you want to request this user's file. y/N?").lower()
+                if user_response == 'y':
+                    myPubKey = self.server.getMyPublicKey(self.internalKey)
+                    mySignature = self.server.getMySignature(self.internalKey)
+                    Target = ServerProxy(url)
+                    flag, msg_file, msg_randomKey = Target.requestFile(myPubKey,mySignature,fileName,self.localUrl)
+                    if flag == OK:
+                        tar_File = self.server.msgInterpreter(msg_file,msg_randomKey,self.internalKey)
+                        print('Request Success!')
+                        with open(join(self.dirName, fileName), 'w') as f:
+                            f.write(tar_File)
+                    else:
+                        print('Request Fail!')
+                elif user_response == 'n':
+                    print('Request aborted')
                 else:
-                    print('Request Fail!')
-            elif user_response == 'n':
-                print('Request aborted')
+                    print('Wrong input. Please request again.')
             else:
-                print('Wrong input. Please request again.')
-        else:
-            pass         
+                pass         
+        except Exception as e:
+            print("error:", e)
 
 
     # def do_addNode(self, otherNode):
@@ -141,14 +163,22 @@ class Client(Cmd):
     #         print('Fetch failed: ', filename)
 
     def do_exit(self, arg):  # 定义退出命令的方法
-        print('------------------Exit Application------------------')
-        if self.sessionON == True:
-            self.server.endSession(self.internalKey)
-        sys.exit()  # 系统退出
+        try:
+            print('------------------Exit Application------------------')
+            if self.sessionON == True:
+                self.server.endSession(self.internalKey)
+            sys.exit()  # 系统退出
+        except Exception as e:
+            print("error:", e)
 
 def main():  # 定义主程序函数
-    localUrl, userName, organization, dirName = sys.argv[1:]  # 获取通过命令行输入的参数
-    client = Client(localUrl, userName, organization, dirName)  # 创建客户端对象
+    r = requests.get("http://ip.42.pl/raw")
+    port, dirName = sys.argv[1:3]  # 获取通过命令行输入的参数
+    if len(sys.argv) >= 4:
+        localUrl = "http://" + sys.argv[3] + ":" + port
+    else:
+        localUrl = "http://" + r.text + ":" + port
+    client = Client(localUrl, dirName)  # 创建客户端对象
     client.cmdloop()  # 启动命令行循环执行
 
 if __name__ == '__main__':
