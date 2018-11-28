@@ -48,16 +48,21 @@ class Node:
         self.dirName = dirName
         self.session = None
         self.host = sp.Host("securep2p.fivebillionmph.com")
+        self.is_new_key = False
 
-        for path in glob.glob("./keys/*"):
-	        shutil.rmtree(path)
-        for path in glob.glob("./permissions/*"):
-	        os.remove(path)
+        # for path in glob.glob("./keys/*"):
+	    #     shutil.rmtree(path)
+        # for path in glob.glob("./permissions/*"):
+	    #     os.remove(path)
         for path in glob.glob("./log/*"):
             os.remove(path)
 
         self.permission = sp.Permission("./permissions", self.userName)
-        self.myKey = sp.genKey("./keys","myKey",self.userName,self.organization)
+        try:
+            self.myKey = sp.getKey("./keys", "myKey")
+        except:
+            self.is_new_key = True
+            self.myKey = sp.genKey("./keys","myKey",self.userName,self.organization)
 
         self.permission.addAuthorizedKey(sp.publicKeyToPemString(self.myKey._public_key), self.userName, self.organization)
         
@@ -74,14 +79,16 @@ class Node:
         self.searchList = set()
         
     def _start(self):   # start the server
-        self.myKey.register(self.host)
+        if self.is_new_key:
+            self.myKey.register(self.host)
         server = SimpleXMLRPCServer((get_url(self.localUrl),get_port(self.localUrl)),logRequests=False)
         server.register_instance(self) 
         print("===========================================================")
         print("Create Client at ", self.localUrl)
         print("User: ", self.userName)
         print("Organization: ", self.organization)
-        print("RSA 2048 keys generated.")
+        if self.is_new_key:
+            print("RSA 2048 keys generated.")
         print("===========================================================")
         server.serve_forever()
 

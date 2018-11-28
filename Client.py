@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from xmlrpc.client import ServerProxy, Fault  # 导入服务器代理类和故障类
 from random import choice  # 导入随机选取的方法
 from string import ascii_lowercase  # 导入小写字母列表对象
