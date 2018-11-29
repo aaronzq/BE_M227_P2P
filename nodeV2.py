@@ -395,15 +395,9 @@ class Node:
     def requestFolder(self, extPubKey, extSignature, extURL):
         time = str(datetime.datetime.now())
         self.log = open("./log/log.txt","a+")
-        #flag = self._checkPermission(extPubKey, extSignature)
-        if flag is True:
-            self.log.write("Success! Folder request from URL: {:}. Time: {:}\n".format(extURL,time))
-            self.log.close()
-            return self._localFolderHandler(extPubKey)
-        else:
-            self.log.write("Fail! Folder request from URL: {:}. Time: {:}\n".format(extURL,time))
-            self.log.close()
-            return PERMISSION_DENY, EMPTY, EMPTY
+        self.log.write("Success! Folder request from URL: {:}. Time: {:}\n".format(extURL,time))
+        self.log.close()
+        return self._localFolderHandler(extPubKey)
 
     # For external Client usage
     # return the sharing file
