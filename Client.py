@@ -99,7 +99,7 @@ class Client(Cmd):
         except Exception as e:
             print("error:", e)
 
-    def do_viewAuthorized(self):
+    def do_viewAuthorized(self, args):
         try:
             self.server.viewAuthorized()
         except Exception as e:
