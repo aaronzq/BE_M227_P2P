@@ -99,6 +99,18 @@ class Client(Cmd):
         except Exception as e:
             print("error:", e)
 
+    def do_viewAuthorized(self):
+        try:
+            self.server.viewAuthorized()
+        except Exception as e:
+            print("error:", e)
+
+    def do_deleteAuthorized(self, name):
+        try:
+            self.server.deleteAuthorized()
+        except Exception as e:
+            print("error:", e)
+
     def do_requestFolder(self, userName):
         try:
             flag, url, username, organization = self.server.getSessionIP(userName, self.internalKey)

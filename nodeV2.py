@@ -226,7 +226,7 @@ class Node:
             return self.session.getSignatures()   
         else:
             self.log.write("Fail [get My Signature]. Time: {:}\n".format(time))
-            print("You need a registered session bofore getting your signatures")
+            print("You need a registered session before getting your signatures")
             self.log.close()
             return PERMISSION_DENY    
 
@@ -431,6 +431,19 @@ class Node:
         f = f.decode()
         return f       
 
+    def viewAuthorized(self):
+        keys = self.permission.getAuthorizedKeys()
+        print("Authorized keys")
+        for k in keys:
+            print("User: {:>25} Organization: {:>30}".format(k["name"], k["organization"]))
+            print("Key: {:}".format(sp.prettyFingerprint(sp.publicKeyFingerprint(sp.pemStringToPublicKey(k["public_key"])))))
+            print("===========================================================")
+        
+
+    def deleteAuthorized(self, name):
+        nDeleted = self.permission.deleteAuthorizedKeysByName(name)
+        print("Deleted {:} authorized keys".format(nDeleted))
+        print("===========================================================")
 
 
     # def _localHandler(self,fileName):  #search for requiring file in local repo
