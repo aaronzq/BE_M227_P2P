@@ -384,8 +384,11 @@ class Node:
     # Input: pubKey: pem str, passed by the other node
     # Input: signature: a signature dict(a colletion of all signature), passed by the other node    
     def _checkPermission(self, pubKey, signature, filepath):
-
-        return self.permission.authorize(pubKey, signature["signatures"][0]["signature"], json.loads(signature["signatures"][0]["message"]), signature["signatures"][0]["signer"]["public_key"], filepath)
+        for sig in signature["signatures"]:
+            check = self.permission.authorize(pubKey, signature["signatures"][0]["signature"], json.loads(signature["signatures"][0]["message"]), signature["signatures"][0]["signer"]["public_key"], filepath)
+            if check:
+                return True
+        return False
    
     # this function is for external nodes
     # extPubKey: pem str
