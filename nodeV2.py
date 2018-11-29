@@ -438,12 +438,14 @@ class Node:
             print("User: {:>25} Organization: {:>30}".format(k["name"], k["organization"]))
             print("Key: {:}".format(sp.prettyFingerprint(sp.publicKeyFingerprint(sp.pemStringToPublicKey(k["key"])))))
             print("===========================================================")
+        return OK
         
 
     def deleteAuthorized(self, name):
         nDeleted = self.permission.deleteAuthorizedKeysByName(name)
         print("Deleted {:} authorized keys".format(nDeleted))
         print("===========================================================")
+        return OK
 
 
     # def _localHandler(self,fileName):  #search for requiring file in local repo
