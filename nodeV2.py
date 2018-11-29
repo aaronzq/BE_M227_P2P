@@ -124,7 +124,7 @@ class Node:
         folderInfo = self.dirName
         for e in os.listdir(self.dirName):
             flag = self._checkPermission(extPubKey,extSignature,join(self.dirName,e))
-            if flag is True
+            if flag is True:
                 folderInfo = folderInfo + '|' + e
 
         randomKey = Fernet.generate_key()
