@@ -350,7 +350,7 @@ class Node:
         if modifier is None:
             self.myKey.signKeyAndSubmit(sp.pemStringToPublicKey(pubKey), self.host, now, tomorrow)
         elif modifier == "cda_id":
-            self.myKey.signKeyAndSubmitCDAPatientID(sp.pemStringToPublicKey(pubKey), self.host, now, modifierValue)
+            self.myKey.signKeyAndSubmitCDAPatientID(sp.pemStringToPublicKey(pubKey), self.host, now, tomorrow, modifierValue)
         else:
             self.log.write("Invalid public key modifier [sign Public Key]. Time: {:}\n".format(time))
             self.log.close()
