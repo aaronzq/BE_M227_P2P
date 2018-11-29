@@ -397,7 +397,7 @@ class Node:
         self.log = open("./log/log.txt","a+")
         self.log.write("Success! Folder request from URL: {:}. Time: {:}\n".format(extURL,time))
         self.log.close()
-        return self._localFolderHandler(extPubKey)
+        return self._localFolderHandler(extPubKey,extSignature)
 
     # For external Client usage
     # return the sharing file
