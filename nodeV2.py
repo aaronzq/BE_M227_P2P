@@ -336,7 +336,7 @@ class Node:
 
     # For Client Usage
     # Input: pubKey(pem str), returned by getPubKey() above
-    def signPubKey(self, pubKey, dayNum, modifier, modifierValue internalKey):
+    def signPubKey(self, pubKey, dayNum, modifier, modifierValue, internalKey):
         time = str(datetime.datetime.now())
         self.log = open("./log/log.txt","a+")
         if not internalKey == self.internalKey:
