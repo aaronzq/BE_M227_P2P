@@ -101,10 +101,10 @@ class Node:
     def _localFileHandler(self, extPubKey, fileName):
         filePath = join(self.dirName, fileName)
         if not isfile(filePath):
-            print('Bad Request: no requiring file in local repo')
+            #print('Bad Request: no requiring file in local repo')
             return NO_SUCH_FILE, EMPTY, EMPTY
         if not inside(self.dirName, filePath):
-            print('Bad Request: This folder is not shared')
+            #print('Bad Request: This folder is not shared')
             return NO_SUCH_FILE, EMPTY, EMPTY
         
         f = open(filePath).read()
@@ -114,23 +114,25 @@ class Node:
         msg_file = cipher_suite.encrypt(f.encode())
         msg_randomKey = sp.encryptMessageB64(sp.pemStringToPublicKey(extPubKey), randomKey.decode())
 
-        print('Good Request: file transmitted.')
+        #print('Good Request: file transmitted.')
         return OK, msg_file.decode(), msg_randomKey
 
     # internal function, prohibited for external user
     # Input: extPubKey(pem str)
     # Output flag, msg_folder(str) and msg_randomKey(str)
-    def _localFolderHandler(self,extPubKey):
+    def _localFolderHandler(self,extPubKey,extSignature):
         folderInfo = self.dirName
         for e in os.listdir(self.dirName):
-            folderInfo = folderInfo + '|' + e
+            flag = self._checkPermission(extPubKey,extSignature,join(self.dirName,e))
+            if flag is True
+                folderInfo = folderInfo + '|' + e
 
         randomKey = Fernet.generate_key()
         cipher_suite = Fernet(randomKey)
         msg_folder = cipher_suite.encrypt(folderInfo.encode())
         msg_randomKey = sp.encryptMessageB64(sp.pemStringToPublicKey(extPubKey), randomKey.decode())
         
-        print('Good Request: file transmitted.')
+        #print('Good Request: file transmitted.')
         return  OK, msg_folder.decode(), msg_randomKey
 
     def startSession(self,internalKey):
@@ -334,7 +336,7 @@ class Node:
 
     # For Client Usage
     # Input: pubKey(pem str), returned by getPubKey() above
-    def signPubKey(self, pubKey, dayNum, internalKey):
+    def signPubKey(self, pubKey, dayNum, modifier, modifierValue internalKey):
         time = str(datetime.datetime.now())
         self.log = open("./log/log.txt","a+")
         if not internalKey == self.internalKey:
@@ -345,7 +347,14 @@ class Node:
 
         now = datetime.datetime.now()
         tomorrow = now + datetime.timedelta(days=dayNum)
-        self.myKey.signKeyAndSubmit(sp.pemStringToPublicKey(pubKey), self.host, now, tomorrow)
+        if modifier is None:
+            self.myKey.signKeyAndSubmit(sp.pemStringToPublicKey(pubKey), self.host, now, tomorrow)
+        elif modifier == "cda_id":
+            self.myKey.signKeyAndSubmitCDAPatientID(sp.pemStringToPublicKey(pubKey), self.host, now, modifierValue)
+        else:
+            self.log.write("Invalid public key modifier [sign Public Key]. Time: {:}\n".format(time))
+            self.log.close()
+            return FAIL
         print('Signed. Expiration at ', str(tomorrow))
         self.log.write("Sign Public Key . Time: {:}\n".format(time))
         self.log.close()
@@ -374,9 +383,9 @@ class Node:
     # Checking the request's authorization
     # Input: pubKey: pem str, passed by the other node
     # Input: signature: a signature dict(a colletion of all signature), passed by the other node    
-    def _checkPermission(self, pubKey, signature):
+    def _checkPermission(self, pubKey, signature, filepath):
 
-        return self.permission.authorize(pubKey, signature["signatures"][0]["signature"], json.loads(signature["signatures"][0]["message"]), signature["signatures"][0]["signer"]["public_key"])
+        return self.permission.authorize(pubKey, signature["signatures"][0]["signature"], json.loads(signature["signatures"][0]["message"]), signature["signatures"][0]["signer"]["public_key"], filepath)
    
     # this function is for external nodes
     # extPubKey: pem str
@@ -386,7 +395,7 @@ class Node:
     def requestFolder(self, extPubKey, extSignature, extURL):
         time = str(datetime.datetime.now())
         self.log = open("./log/log.txt","a+")
-        flag = self._checkPermission(extPubKey, extSignature)
+        #flag = self._checkPermission(extPubKey, extSignature)
         if flag is True:
             self.log.write("Success! Folder request from URL: {:}. Time: {:}\n".format(extURL,time))
             self.log.close()
@@ -402,7 +411,7 @@ class Node:
     def requestFile(self, extPubKey, extSignature, fileName, extURL):
         time = str(datetime.datetime.now())
         self.log = open("./log/log.txt","a+")
-        flag = self._checkPermission(extPubKey, extSignature)
+        flag = self._checkPermission(extPubKey, extSignature, join(self.dirName, fileName))
         if flag is True:
             self.log.write("Success! File [{:}] request from URL: {:}. Time: {:}\n".format(fileName,extURL,time))
             self.log.close()

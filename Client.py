@@ -62,12 +62,17 @@ class Client(Cmd):
     # arg: userName, expirationDay
     def do_sign(self, arg):
         try:
-            userName, expirationDay = arg.split()
+            try:
+                userName, expirationDay = arg.split()
+                modifier = None
+                modifierValue = None
+            except:
+                userName, expirationDay, modifier, modifierValue = arg.split()
             flag, pubk, username, organization = self.server.getPubKey(userName, self.internalKey)
             if flag == OK:
                 user_response = input("Are you sure that you want to sign this user. y/N?").lower()
                 if user_response == 'y':
-                    self.server.signPubKey(pubk, int(expirationDay), self.internalKey)
+                    self.server.signPubKey(pubk, int(expirationDay), modifier, modifierValue, self.internalKey)
                 elif user_response == 'n':
                     print('Signing aborted')
                 else:
