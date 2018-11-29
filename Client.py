@@ -107,7 +107,7 @@ class Client(Cmd):
 
     def do_deleteAuthorized(self, name):
         try:
-            self.server.deleteAuthorized()
+            self.server.deleteAuthorized(name)
         except Exception as e:
             print("error:", e)
 

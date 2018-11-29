@@ -436,7 +436,7 @@ class Node:
         print("Authorized keys")
         for k in keys:
             print("User: {:>25} Organization: {:>30}".format(k["name"], k["organization"]))
-            print("Key: {:}".format(sp.prettyFingerprint(sp.publicKeyFingerprint(sp.pemStringToPublicKey(k["public_key"])))))
+            print("Key: {:}".format(sp.prettyFingerprint(sp.publicKeyFingerprint(sp.pemStringToPublicKey(k["key"])))))
             print("===========================================================")
         
 
