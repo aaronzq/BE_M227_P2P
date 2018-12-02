@@ -385,7 +385,7 @@ class Node:
     # Input: signature: a signature dict(a colletion of all signature), passed by the other node    
     def _checkPermission(self, pubKey, signature, filepath):
         for sig in signature["signatures"]:
-            check = self.permission.authorize(pubKey, signature["signatures"][0]["signature"], json.loads(signature["signatures"][0]["message"]), signature["signatures"][0]["signer"]["public_key"], filepath)
+            check = self.permission.authorize(pubKey, sig["signature"], json.loads(sig["message"]), sig["signer"]["public_key"], filepath)
             if check:
                 return True
         return False
