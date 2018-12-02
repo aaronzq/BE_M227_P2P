@@ -25,10 +25,11 @@ class Client(Cmd):
 
     def __init__(self, localUrl, dirName):  # 定义构造方法
         Cmd.__init__(self)  # 重载超类的构造方法
-        self.localUrl = localUrl
+   	    r = requests.get("http://ip.42.pl/raw")
+        self.localUrl = r.text
         self.dirName = dirName
         self.sessionON = False
-        node = Node(self.localUrl, dirName)  # 创建节点对象
+        node = Node(localUrl, dirName)  # 创建节点对象
         thread = Thread(target=node._start)  # 在独立的线程中启动服务器
         thread.setDaemon(True)  # 将线程设置为守护线程
         thread.start()  # 启动线程
@@ -189,12 +190,11 @@ class Client(Cmd):
             print("error:", e)
 
 def main():  # 定义主程序函数
-    r = requests.get("http://ip.42.pl/raw")
     port, dirName = sys.argv[1:3]  # 获取通过命令行输入的参数
     if len(sys.argv) >= 4:
         localUrl = "http://" + sys.argv[3] + ":" + port
     else:
-        localUrl = "http://" + r.text + ":" + port
+        localUrl = "http://0.0.0.0:" + port
     client = Client(localUrl, dirName)  # 创建客户端对象
     client.cmdloop()  # 启动命令行循环执行
 
