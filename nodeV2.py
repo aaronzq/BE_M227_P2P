@@ -384,6 +384,8 @@ class Node:
     # Input: pubKey: pem str, passed by the other node
     # Input: signature: a signature dict(a colletion of all signature), passed by the other node    
     def _checkPermission(self, pubKey, signature, filepath):
+        if self.permission.authorize(pubKey, None, None, None, filepath):
+            return True
         for sig in signature["signatures"]:
             check = self.permission.authorize(pubKey, sig["signature"], json.loads(sig["message"]), sig["signer"]["public_key"], filepath)
             if check:
