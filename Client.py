@@ -36,7 +36,7 @@ class Client(Cmd):
         sleep(HEAD_START)  # 等待服务器启动
         with open('./keys/myKey/private-key') as f:
             self.internalKey = f.read()
-        self.server = ServerProxy(self.localUrl)  # 创建服务器代理对象
+        self.server = ServerProxy(localUrl)  # 创建服务器代理对象
 
     # register the session on the cloud server
     def do_startSession(self,arg):
