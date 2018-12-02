@@ -65,8 +65,8 @@ class Client(Cmd):
         try:
             try:
                 userName, expirationDay = arg.split()
-                modifier = None
-                modifierValue = None
+                modifier = ""
+                modifierValue = ""
             except:
                 userName, expirationDay, modifier, modifierValue = arg.split()
             flag, pubk, username, organization = self.server.getPubKey(userName, self.internalKey)

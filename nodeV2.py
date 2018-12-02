@@ -347,7 +347,7 @@ class Node:
 
         now = datetime.datetime.now()
         tomorrow = now + datetime.timedelta(days=dayNum)
-        if modifier is None:
+        if modifier == "":
             self.myKey.signKeyAndSubmit(sp.pemStringToPublicKey(pubKey), self.host, now, tomorrow)
         elif modifier == "cda_id":
             self.myKey.signKeyAndSubmitCDAPatientID(sp.pemStringToPublicKey(pubKey), self.host, now, tomorrow, modifierValue)
