@@ -25,7 +25,7 @@ class Client(Cmd):
 
     def __init__(self, localUrl, dirName):  # 定义构造方法
         Cmd.__init__(self)  # 重载超类的构造方法
-   	    r = requests.get("http://ip.42.pl/raw")
+        r = requests.get("http://ip.42.pl/raw")
         self.localUrl = r.text
         self.dirName = dirName
         self.sessionON = False
